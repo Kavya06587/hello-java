@@ -2,28 +2,19 @@ pipeline {
     agent any
 
     stages {
-        stage('Checkout') {
-            steps {
-                echo "Code checkout done automatically by Jenkins SCM"
-            }
-        }
-
         stage('Compile') {
             steps {
-                sh '''
-                    echo "Creating output folder..."
-                    mkdir -p out
-
-                    echo "Compiling Java code..."
-                    javac -d out src/Hello.java
+                bat '''
+                    if exist out rmdir /s /q out
+                    mkdir out
+                    javac -d out src\\Hello.java
                 '''
             }
         }
 
         stage('Run') {
             steps {
-                sh '''
-                    echo "Running Java program..."
+                bat '''
                     java -cp out Hello
                 '''
             }
