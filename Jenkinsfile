@@ -1,48 +1,44 @@
 pipeline {
     agent any
 
-
     stages {
-
-        stage('Checkout Code') {
+        stage('Checkout') {
             steps {
-                echo 'Code already checked out from Git'
+                echo "Code checkout done automatically by Jenkins SCM"
             }
         }
 
-    stage('Compile Java') {
-        steps {
-            sh '''
-                rm -rf build
-                mkdir build
-                javac -d build src/Hello.java
-                jar cfe hello.jar Hello -C build .
-            '''
-        }
-    }
-
-
-        stage('Prepare Package Directory') {
+        stage('Compile') {
             steps {
                 sh '''
-                    mkdir -p package/usr/local/bin
-                    cp hello.jar package/usr/local/bin/
+                    echo "Creating output folder..."
+                    mkdir -p out
+
+                    echo "Compiling Java code..."
+                    javac -d out src/Hello.java
                 '''
             }
         }
 
-        stage('Build DEB using FPM') {
+        stage('Run') {
             steps {
                 sh '''
-                    fpm -s dir -t deb -n hello-java -v 1.0.${BUILD_NUMBER} --prefix=/ -C package
+                    echo "Running Java program..."
+                    java -cp out Hello
                 '''
             }
         }
     }
 
     post {
+        always {
+            echo "Pipeline completed (success or failure)."
+        }
         success {
-            archiveArtifacts artifacts: '*.deb'
+            echo "✅ Build SUCCESS!"
+        }
+        failure {
+            echo "❌ Build FAILED!"
         }
     }
 }
